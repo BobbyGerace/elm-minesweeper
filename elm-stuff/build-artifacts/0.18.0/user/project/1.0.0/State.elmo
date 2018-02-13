@@ -1,0 +1,299 @@
+var _user$project$State$listFromMaybes = function (lst) {
+	listFromMaybes:
+	while (true) {
+		var _p0 = lst;
+		if (_p0.ctor === '[]') {
+			return {ctor: '[]'};
+		} else {
+			if (_p0._0.ctor === 'Just') {
+				return {
+					ctor: '::',
+					_0: _p0._0._0,
+					_1: _user$project$State$listFromMaybes(_p0._1)
+				};
+			} else {
+				var _v1 = _p0._1;
+				lst = _v1;
+				continue listFromMaybes;
+			}
+		}
+	}
+};
+var _user$project$State$areAdjacent = F2(
+	function (_p2, _p1) {
+		var _p3 = _p2;
+		var _p4 = _p1;
+		var yDist = _elm_lang$core$Basics$abs(_p3._1 - _p4._1);
+		var xDist = _elm_lang$core$Basics$abs(_p3._0 - _p4._0);
+		return (_elm_lang$core$Native_Utils.cmp(xDist, 1) < 1) && (_elm_lang$core$Native_Utils.cmp(yDist, 1) < 1);
+	});
+var _user$project$State$randomPairList = F4(
+	function (rows, cols, len, coords) {
+		var inLst = F2(
+			function (p, lst) {
+				return A2(_elm_lang$core$List$member, p, lst);
+			});
+		var maybeAppend = F2(
+			function (p, lst) {
+				return (A2(inLst, p, lst) || A2(_user$project$State$areAdjacent, p, coords)) ? lst : {ctor: '::', _0: p, _1: lst};
+			});
+		var colGen = A2(_elm_lang$core$Random$int, 0, cols - 1);
+		var rowGen = A2(_elm_lang$core$Random$int, 0, rows - 1);
+		var pair = A2(_elm_lang$core$Random$pair, rowGen, colGen);
+		var next = function (lst) {
+			return (_elm_lang$core$Native_Utils.cmp(
+				_elm_lang$core$List$length(lst),
+				len) < 0) ? A2(
+				_elm_lang$core$Random$andThen,
+				function (p) {
+					return next(
+						A2(maybeAppend, p, lst));
+				},
+				pair) : A2(
+				_elm_lang$core$Random$map,
+				function (_p5) {
+					return lst;
+				},
+				_elm_lang$core$Random$bool);
+		};
+		return next(
+			{ctor: '[]'});
+	});
+var _user$project$State$crossProduct = F2(
+	function (a, b) {
+		var pairWith = F2(
+			function (x, list) {
+				return A2(
+					_elm_lang$core$List$map,
+					function (y) {
+						return {ctor: '_Tuple2', _0: x, _1: y};
+					},
+					list);
+			});
+		return _elm_lang$core$List$concat(
+			A2(
+				_elm_lang$core$List$map,
+				function (x) {
+					return A2(pairWith, x, b);
+				},
+				a));
+	});
+var _user$project$State$getSurrounding = F3(
+	function (r, c, field) {
+		var get = function (_p6) {
+			var _p7 = _p6;
+			return A3(_user$project$Types$getCell, _p7._0, _p7._1, field);
+		};
+		var offsets = {
+			ctor: '::',
+			_0: -1,
+			_1: {
+				ctor: '::',
+				_0: 0,
+				_1: {
+					ctor: '::',
+					_0: 1,
+					_1: {ctor: '[]'}
+				}
+			}
+		};
+		var offsetPairs = A2(
+			_elm_lang$core$List$filter,
+			function (p) {
+				return !_elm_lang$core$Native_Utils.eq(
+					p,
+					{ctor: '_Tuple2', _0: 0, _1: 0});
+			},
+			A2(_user$project$State$crossProduct, offsets, offsets));
+		return _user$project$State$listFromMaybes(
+			A2(
+				_elm_lang$core$List$map,
+				function (_p8) {
+					var _p9 = _p8;
+					return get(
+						{ctor: '_Tuple2', _0: r + _p9._0, _1: c + _p9._1});
+				},
+				offsetPairs));
+	});
+var _user$project$State$updateNumbers = function (field) {
+	var update = F2(
+		function (num, cell) {
+			var _p10 = cell.contents;
+			if (_p10.ctor === 'Bomb') {
+				return cell;
+			} else {
+				return _elm_lang$core$Native_Utils.eq(num, 0) ? _elm_lang$core$Native_Utils.update(
+					cell,
+					{contents: _user$project$Types$Empty}) : _elm_lang$core$Native_Utils.update(
+					cell,
+					{
+						contents: _user$project$Types$Number(num)
+					});
+			}
+		});
+	var surr = F2(
+		function (r, c) {
+			return A3(_user$project$State$getSurrounding, r, c, field);
+		});
+	var count = F2(
+		function (r, c) {
+			return _elm_lang$core$List$length(
+				A2(
+					_elm_lang$core$List$filter,
+					function (c) {
+						return _elm_lang$core$Native_Utils.eq(c.contents, _user$project$Types$Bomb);
+					},
+					A2(surr, r, c)));
+		});
+	return A2(
+		_user$project$Types$mapField,
+		F3(
+			function (r, c, cell) {
+				return A2(
+					update,
+					A2(count, r, c),
+					cell);
+			}),
+		field);
+};
+var _user$project$State$addMinesToField = F2(
+	function (mines, field) {
+		return A3(_elm_lang$core$List$foldl, _user$project$Types$setMine, field, mines);
+	});
+var _user$project$State$clickCell = F2(
+	function (_p11, field) {
+		var _p12 = _p11;
+		var _p15 = _p12._0;
+		var _p14 = _p12._1;
+		var cell = A3(_user$project$Types$getCell, _p15, _p14, field);
+		var click = function (cell) {
+			return _elm_lang$core$Native_Utils.update(
+				cell,
+				{state: _user$project$Types$Clicked});
+		};
+		var newField = A4(_user$project$Types$setCell, _p15, _p14, click, field);
+		var _p13 = A2(
+			_elm_lang$core$Maybe$map,
+			function (c) {
+				return {ctor: '_Tuple2', _0: c.contents, _1: c.state};
+			},
+			cell);
+		if ((((_p13.ctor === 'Just') && (_p13._0.ctor === '_Tuple2')) && (_p13._0._0.ctor === 'Empty')) && (_p13._0._1.ctor === 'Unclicked')) {
+			return A2(
+				_user$project$State$clickSurrounding,
+				{ctor: '_Tuple2', _0: _p15, _1: _p14},
+				newField);
+		} else {
+			return newField;
+		}
+	});
+var _user$project$State$clickSurrounding = F2(
+	function (_p16, field) {
+		var _p17 = _p16;
+		var click = F2(
+			function (_p18, f) {
+				var _p19 = _p18;
+				return A2(
+					_user$project$State$clickCell,
+					{ctor: '_Tuple2', _0: _p17._0 + _p19._0, _1: _p17._1 + _p19._1},
+					f);
+			});
+		var offsets = {
+			ctor: '::',
+			_0: -1,
+			_1: {
+				ctor: '::',
+				_0: 0,
+				_1: {
+					ctor: '::',
+					_0: 1,
+					_1: {ctor: '[]'}
+				}
+			}
+		};
+		var offsetPairs = A2(
+			_elm_lang$core$List$filter,
+			function (p) {
+				return !_elm_lang$core$Native_Utils.eq(
+					p,
+					{ctor: '_Tuple2', _0: 0, _1: 0});
+			},
+			A2(_user$project$State$crossProduct, offsets, offsets));
+		return A3(_elm_lang$core$List$foldl, click, field, offsetPairs);
+	});
+var _user$project$State$updateFieldWithMines = F3(
+	function (coords, mines, field) {
+		return A2(
+			_user$project$State$clickCell,
+			coords,
+			_user$project$State$updateNumbers(
+				A2(_user$project$State$addMinesToField, mines, field)));
+	});
+var _user$project$State$handleCellClick = F2(
+	function (model, coords) {
+		var rpList = A3(_user$project$State$randomPairList, model.options.rows, model.options.cols, model.options.bombs);
+		var _p20 = model.state;
+		switch (_p20.ctor) {
+			case 'Playing':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							field: A2(_user$project$State$clickCell, coords, model.field)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Ready':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(
+						_elm_lang$core$Random$generate,
+						_user$project$Types$MineList(coords),
+						rpList(coords))
+				};
+			default:
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+		}
+	});
+var _user$project$State$defaultOpts = {rows: 8, cols: 8, bombs: 10};
+var _user$project$State$blankCell = {
+	contents: _user$project$Types$Empty,
+	state: _user$project$Types$Unclicked(0)
+};
+var _user$project$State$blankField = F2(
+	function (rows, cols) {
+		var mineRow = A2(_elm_lang$core$Array$repeat, cols, _user$project$State$blankCell);
+		return A2(_elm_lang$core$Array$repeat, rows, mineRow);
+	});
+var _user$project$State$init = function () {
+	var model = {
+		field: A2(_user$project$State$blankField, _user$project$State$defaultOpts.rows, _user$project$State$defaultOpts.cols),
+		options: _user$project$State$defaultOpts,
+		state: _user$project$Types$Ready
+	};
+	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+}();
+var _user$project$State$update = F2(
+	function (msg, model) {
+		var blank = A2(_user$project$State$blankField, model.options.rows, model.options.cols);
+		var _p21 = msg;
+		switch (_p21.ctor) {
+			case 'CellClicked':
+				return A2(_user$project$State$handleCellClick, model, _p21._0);
+			case 'MineList':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							field: A3(_user$project$State$updateFieldWithMines, _p21._0, _p21._1, blank),
+							state: _user$project$Types$Playing(0)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				return _user$project$State$init;
+		}
+	});

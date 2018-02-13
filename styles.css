@@ -1,0 +1,13 @@
+.mine {
+  height: 20px;
+  width: 20px;
+}
+
+.mine.clicked {
+  background-color: lightblue;
+}
+
+table, tbody, tr, td {
+  margin: 0;
+  padding: 0;
+}
