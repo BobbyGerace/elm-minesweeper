@@ -30,6 +30,9 @@ update msg model =
                                 state = Playing 0
                             }, Cmd.none)
             StopGame  -> init
+            Tick _ -> case model.state of
+                        Playing n -> ({ model | state = Playing (n + 1)}, Cmd.none)
+                        _         -> (model, Cmd.none)
             
 handleCellClick : Model -> (Int, Int) -> (Model, Cmd Msg)
 handleCellClick model coords =
@@ -38,9 +41,50 @@ handleCellClick model coords =
                      model.options.cols 
                      model.options.bombs
     in case model.state of
-        Playing _ -> ({ model | field = clickCell coords model.field }, Cmd.none)
+        Playing _ -> handlePlayingClick model coords
         Ready -> (model, Random.generate (MineList coords) <| rpList coords)
         _ -> (model, Cmd.none)
+
+handlePlayingClick : Model -> (Int, Int) -> (Model, Cmd Msg)
+handlePlayingClick model coords =
+    let newModel = {model | field = clickCell coords model.field }
+    in (newModel |> checkWin |> checkLoss, Cmd.none)
+
+checkWin : Model -> Model
+checkWin model = 
+    let isWin = Array.foldl (\row rowWin ->
+                  rowWin && Array.foldl (\cell acc ->
+                    acc && isWinningCell cell
+                  ) True row
+                ) True model.field
+    in case (model.state, isWin) of
+          (Playing n, True) -> { model | state = Won n }
+          _                 -> model
+
+checkLoss : Model -> Model
+checkLoss model =
+    let isLoss = Array.foldl (\row rowWin ->
+                  rowWin || Array.foldl (\cell acc ->
+                    acc || isLosingCell cell
+                  ) False row
+                ) False model.field
+    in case (model.state, isLoss) of
+          (Playing n, True) -> { model | state = Lost n }
+          _                 -> model
+
+isLosingCell : Cell -> Bool
+isLosingCell cell = 
+    case (cell.state, cell.contents) of
+        (Clicked, Bomb) -> True
+        _               -> False
+
+isWinningCell : Cell -> Bool
+isWinningCell cell = 
+    case (cell.state, cell.contents) of
+        (Unclicked _, Bomb) -> True
+        (Clicked, Number _) -> True
+        (Clicked, Empty)    -> True
+        _                   -> False
     
 clickCell : (Int, Int) -> Minefield -> Minefield
 clickCell (r, c) field = 

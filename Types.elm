@@ -1,6 +1,7 @@
 module Types exposing (..)
 
 import Array
+import Time exposing (Time)
 
 type alias Options = { rows : Int
                      , cols : Int
@@ -11,7 +12,7 @@ type CellState = Clicked | Unclicked Int
 
 type CellContents = Bomb | Number Int | Empty
 
-type GameState = Ready | Playing Int | Won | Lost
+type GameState = Ready | Playing Int | Won Int| Lost Int
 
 type alias Cell = { contents : CellContents
                   , state : CellState
@@ -28,6 +29,7 @@ type Msg =
         CellClicked (Int, Int)
         | StopGame
         | MineList (Int, Int) (List (Int, Int))
+        | Tick Time
 
                     
 mineCount : Minefield -> Int

@@ -10,6 +10,7 @@ view : Model -> Html Msg
 view model = 
         div [] [
           span [] [mineCount model.field |> toString |> text],
+          span [] [timer model.state],
           table [] [
             minefield model
           ]
@@ -38,3 +39,11 @@ cellView i j cell =
                                 then " clicked" 
                                 else " unclicked"
         in td [onClick (CellClicked (i,j))] [button [class classes] [content]]
+
+timer : GameState -> Html Msg
+timer state =
+    case state of
+        Playing n -> text <| toString n
+        Won _     -> text "Won"
+        Lost _     -> text "Lost"
+        _         -> text "0"

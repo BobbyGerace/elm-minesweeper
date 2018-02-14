@@ -4,6 +4,7 @@ import Html exposing (program)
 import View exposing (view)
 import State exposing (update, init)
 import Types exposing (..)
+import Time exposing (every, second)
 
 main =
       program
@@ -14,4 +15,7 @@ main =
           }
                               
 subscriptions : Model -> Sub Msg
-subscriptions model = Sub.none
+subscriptions model =
+    case model.state of
+        Playing _ -> every second Tick
+        _         -> Sub.none
