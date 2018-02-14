@@ -55,7 +55,9 @@ handleRightClick model (r, c)  =
                         Clicked        -> cell
                         Unclicked flag -> { cell | state = Unclicked (toggleFlag flag) }
         newModel = { model | field = setCell r c toggle model.field }
-    in (newModel, Cmd.none)
+    in case model.state of 
+         Playing _ -> (newModel, Cmd.none)
+         _         -> (model, Cmd.none)
 
 
 handlePlayingClick : Model -> (Int, Int) -> (Model, Cmd Msg)
@@ -107,8 +109,8 @@ clickCell (r, c) field =
     in case Maybe.map (\c -> (c.contents, c.state)) cell of
         --Dont allow clicks on flagged cells
         Just (_, Unclicked Flagged) -> field
-        Just (Empty, Unclicked _) -> clickSurrounding (r, c) newField
-        _                  -> newField
+        Just (Empty, Unclicked _)   -> clickSurrounding (r, c) newField
+        _                           -> newField
 
 clickSurrounding : (Int, Int) -> Minefield -> Minefield
 clickSurrounding (r, c) field = 
