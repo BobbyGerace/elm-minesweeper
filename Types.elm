@@ -8,7 +8,7 @@ type alias Options = { rows : Int
                      , bombs : Int
                      }
 
-type CellState = Clicked | Unclicked Int
+type CellState = Clicked | Unclicked FlagState
 
 type CellContents = Bomb | Number Int | Empty
 
@@ -17,6 +17,8 @@ type GameState = Ready | Playing Int | Won Int| Lost Int
 type alias Cell = { contents : CellContents
                   , state : CellState
                   }
+
+type FlagState = Flagged | Question | None
                                                       
 type alias MineRow = Array.Array Cell
 type alias Minefield = Array.Array MineRow
@@ -27,7 +29,8 @@ type alias Model = { field : Minefield
 
 type Msg = 
         CellClicked (Int, Int)
-        | StopGame
+        | CellRightClicked (Int, Int)
+        | ResetGame
         | MineList (Int, Int) (List (Int, Int))
         | Tick Time
 
@@ -67,3 +70,9 @@ getCell r c field =
         Array.get r field
             |> Maybe.andThen (Array.get c)
                                 
+toggleFlag : FlagState -> FlagState
+toggleFlag flag = 
+    case flag of
+        None     -> Flagged
+        Flagged  -> Question
+        Question -> None

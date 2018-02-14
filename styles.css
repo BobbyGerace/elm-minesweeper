@@ -7,6 +7,14 @@
   background-color: lightblue;
 }
 
+.mine.flagged {
+  background-color: yellow;
+}
+
+.mine.question {
+  background-color: lightgreen;
+}
+
 table, tbody, tr, td {
   margin: 0;
   padding: 0;

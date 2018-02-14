@@ -6,7 +6,7 @@ import Random
 import Types exposing (..)
 
 blankCell = { contents = Empty
-            , state = Unclicked 0
+            , state = Unclicked None
             }
                             
 blankField : Int -> Int -> Minefield
@@ -25,11 +25,15 @@ update msg model =
       let blank = blankField model.options.rows model.options.cols
       in case msg of
             CellClicked coords -> handleCellClick model coords
+            CellRightClicked coords -> handleRightClick model coords
             MineList coords lst -> ({ model |
                                 field = updateFieldWithMines coords lst blank,
                                 state = Playing 0
                             }, Cmd.none)
-            StopGame  -> init
+            ResetGame  -> ({ model | 
+                              state = Ready,
+                              field = blank
+                          }, Cmd.none)
             Tick _ -> case model.state of
                         Playing n -> ({ model | state = Playing (n + 1)}, Cmd.none)
                         _         -> (model, Cmd.none)
@@ -44,6 +48,15 @@ handleCellClick model coords =
         Playing _ -> handlePlayingClick model coords
         Ready -> (model, Random.generate (MineList coords) <| rpList coords)
         _ -> (model, Cmd.none)
+
+handleRightClick : Model -> (Int, Int) -> (Model, Cmd Msg)
+handleRightClick model (r, c)  =
+    let toggle cell = case cell.state of
+                        Clicked        -> cell
+                        Unclicked flag -> { cell | state = Unclicked (toggleFlag flag) }
+        newModel = { model | field = setCell r c toggle model.field }
+    in (newModel, Cmd.none)
+
 
 handlePlayingClick : Model -> (Int, Int) -> (Model, Cmd Msg)
 handlePlayingClick model coords =
@@ -92,6 +105,8 @@ clickCell (r, c) field =
         cell = getCell r c field
         newField = setCell r c click field
     in case Maybe.map (\c -> (c.contents, c.state)) cell of
+        --Dont allow clicks on flagged cells
+        Just (_, Unclicked Flagged) -> field
         Just (Empty, Unclicked _) -> clickSurrounding (r, c) newField
         _                  -> newField
 
