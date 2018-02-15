@@ -30,27 +30,44 @@ view model =
 minefield : Model -> Html Msg
 minefield model = 
     table [class "field-table"] [
-        fieldView model.field
+        fieldView model.state model.field
     ]
 
-fieldView : Minefield -> Html Msg
-fieldView field = 
-        let arr = Array.indexedMap rowView field
+fieldView : GameState -> Minefield -> Html Msg
+fieldView state field = 
+        let arr = Array.indexedMap (rowView state) field
         in tbody [] (Array.toList arr)
 
-rowView : Int -> MineRow -> Html Msg
-rowView i row = 
-        let arr = Array.indexedMap (cellView i) row
+rowView : GameState -> Int -> MineRow -> Html Msg
+rowView state i row = 
+        let arr = Array.indexedMap (cellView state i) row
         in tr [class "field-row"] (Array.toList arr)
 
-cellView : Int -> Int -> Cell -> Html Msg
-cellView i j cell =
-        let content = cellContents i j cell
+cellView : GameState -> Int -> Int -> Cell -> Html Msg
+cellView state i j cell =
+        let getContent = case state of
+                            Won _ -> wonContents
+                            Lost _ -> lostContents
+                            _ -> cellContents
+            content = getContent i j cell
             classes = case (cell.contents, cell.state) of
                           (Bomb, Clicked)   -> "field-cell clicked clicked-bomb"
                           (_ , Clicked)     -> "field-cell clicked" 
                           _                 -> "field-cell"
         in td [class classes] [content]
+
+lostContents : Int -> Int -> Cell -> Html Msg
+lostContents i j cell = 
+    case (cell.state, cell.contents) of
+        (Unclicked Flagged, Empty) -> text "❌"
+        (Unclicked Flagged, Number _) -> text "❌"
+        _ -> cellContents i j cell
+
+wonContents : Int -> Int -> Cell -> Html Msg
+wonContents i j cell = 
+    case (cell.state, cell.contents) of
+        (Unclicked _, Bomb) -> cellContents i j { cell | state = Unclicked Flagged }
+        _ -> cellContents i j cell
 
 
 cellContents : Int -> Int -> Cell -> Html Msg
@@ -97,17 +114,19 @@ buttonFace state =
 
 timer : GameState -> Html Msg
 timer state =
-    case state of
-        Playing n -> text <| toString n
-        Won n     -> text <| toString n
-        Lost n    -> text <| toString n
-        _         -> text "0"
+    let num = case state of
+                Playing n -> toString n
+                Won n     -> toString n
+                Lost n    -> toString n
+                _         -> "0"
+    in num |> leftPad '0' 3 |> text
 
 mineDisplay : Model -> Html Msg
 mineDisplay model =
-    case model.state of
-        Ready -> model.options.bombs |> toString |> text
-        _     -> mineCount model.field |> toString |> text
+    let num = case model.state of
+                Ready -> model.options.bombs |> toString
+                _     -> mineCount model.field |> toString
+    in num |> leftPad '0' 3 |> text
 
 onRightClick : (Int, Int) -> Attribute Msg
 onRightClick coords = 
@@ -116,3 +135,9 @@ onRightClick coords =
                   }
         decoder = D.maybe D.bool |> D.map (\_ -> CellRightClicked coords)
     in onWithOptions "contextmenu" options decoder
+
+leftPad : Char -> Int -> String -> String
+leftPad ch n str = 
+    if String.length str < n
+    then leftPad ch n <| String.cons ch str
+    else str

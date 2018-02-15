@@ -38,8 +38,10 @@ type Msg =
 mineCount : Minefield -> Int
 mineCount field =
       let isBomb cell = cell.contents == Bomb
+          isFlag cell = cell.state == Unclicked Flagged
           rowCount row = row |> Array.filter isBomb |> Array.length
-      in Array.foldl (\row sum -> sum + (rowCount row) ) 0 field
+          rowCountFlags row = row |> Array.filter isFlag |> Array.length
+      in Array.foldl (\row sum -> sum + (rowCount row) - (rowCountFlags row)) 0 field
                        
 setCell : Int -> Int -> (Cell -> Cell) -> Minefield -> Minefield
 setCell r c fn field = 
