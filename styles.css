@@ -1,21 +1,135 @@
-.mine {
-  height: 20px;
-  width: 20px;
+body {
+  background-color: #555
 }
 
-.mine.clicked {
-  background-color: lightblue;
+table.game-container {
+    background-color: #222;
+    border-radius: 6px;
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 
-.mine.flagged {
-  background-color: yellow;
+tr.game-header > td.bomb-count-cell {
+    text-align: left;
+    padding: 10px;
 }
 
-.mine.question {
-  background-color: lightgreen;
+tr.game-header > td.timer-cell {
+    text-align: right;
+    padding: 10px;
 }
 
-table, tbody, tr, td {
-  margin: 0;
-  padding: 0;
+tr.game-header {
+    text-align: center;
+}
+
+tr.game-header > td {
+    padding: 5px;
+}
+
+td.bomb-count-cell,
+td.timer-cell {
+    color: lightblue;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 30px;
+}
+
+td.face-button-cell > button {
+    font-size: 25px;
+    background-color: #333;
+    border-style: outset;
+    border-color: #444;
+    border-width: 1px;
+    padding: 5px;
+    font-family: "Apple Color Emoji","Segoe UI Emoji","NotoColorEmoji","Segoe UI Symbol","Android Emoji","EmojiSymbols","EmojiOne Mozilla";
+}
+
+td.field-cell {
+    height: 35px;
+    width: 35px;
+    padding: 0;
+    margin:0;
+    vertical-align: middle;
+    text-align: center;
+    background-color: hsl(0, 0%, 9%);
+}
+
+td.field-cell.clicked {
+    border: 1px solid #444;
+    box-sizing: border-box;
+}
+
+button.field-button {
+    height: 100%;
+    width: 100%;
+    display: inline-block;
+    background-color: #333;
+    border-style: outset;
+    border-color: #444;
+    border-width: 1px;
+    font-family: initial;
+}
+
+table.field-table {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+td.field-container-cell {
+    padding: 5px;
+}
+
+span.number-cell {
+    font-family: Arial;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    width: 100%;
+    height: 100%;
+}
+
+.one {
+    color: hsl(210, 50%, 60%)
+}
+
+.two {
+    color: hsl(85, 50%, 50%)
+}
+
+.three {
+    color: hsl(0, 50%, 50%);
+}
+
+.four {
+    color: hsl(260, 80%, 65%);
+}
+
+.five {
+    color: hsl(25, 80%, 50%);
+}
+
+.six {
+    color: hsl(165, 80%, 35%);
+}
+
+.seven {
+    color: hsl(60, 70%, 50%);
+}
+
+.eight {
+    color: hsl(0, 0%, 85%);
+}
+
+button:active,
+    button.face-button:active {
+border-style: inset;
+}
+
+button:focus {
+    outline: 0;
+}
+
+.field-cell.clicked-bomb {
+    background-color: hsl(0, 70%, 50%)
 }
