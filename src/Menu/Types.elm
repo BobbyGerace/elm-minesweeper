@@ -3,9 +3,12 @@ module Menu.Types exposing (..)
 type alias Options = { rows : Int
                      , cols : Int
                      , bombs : Int
+                     , optionType : OptionType
                      }
 
-type MenuMsg = 
+type OptionType = Beginner | Intermediate | Expert
+
+type Msg = 
     BeginnerClick
     | IntermediateClick
     | ExpertClick

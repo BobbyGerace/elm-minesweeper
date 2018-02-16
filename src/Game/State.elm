@@ -4,7 +4,8 @@ import Array
 import List
 import Random
 import Game.Types exposing (..)
-import Menu.Types exposing (..)
+import Menu.State as MS
+import Menu.Types exposing (Options)
 
 blankCell = { contents = Empty
             , state = Unclicked None
@@ -16,10 +17,7 @@ blankField rows cols =
     in Array.repeat rows mineRow
 
 defaultOpts : Options
-defaultOpts = { rows = 8
-              , cols = 8
-              , bombs = 10
-              }
+defaultOpts = MS.beginnerOpts
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -38,7 +36,14 @@ update msg model =
         Tick _ -> case model.state of
                     Playing n -> ({ model | state = Playing (n + 1)}, Cmd.none)
                     _         -> (model, Cmd.none)
-        MenuAction a -> (model, Cmd.none)
+        MenuAction a -> 
+                        let (newOpts, cmd) = MS.update a model.options
+                            newModel = { model |
+                                        field = blankField newOpts.rows newOpts.cols,
+                                        state = Ready,
+                                        options = newOpts
+                                    }
+                        in (newModel, Cmd.map MenuAction cmd)
 
 handleCellClick : Model -> (Int, Int) -> (Model, Cmd Msg)
 handleCellClick model coords =

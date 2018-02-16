@@ -13,18 +13,20 @@ view : Model -> Html Msg
 view model = 
     div [] [
         Html.map MenuAction (MV.view model.options),
-        table [class "game-container"] [
-            tbody [] [
-                tr [class "game-header"] [
-                    td [class "bomb-count-cell"] [mineDisplay model],
-                    td [class "face-button-cell"] [
-                      button [onClick ResetGame, class "face-button"] [buttonFace model.state]
+        div [class "main-content"] [
+            table [class "game-container"] [
+                tbody [] [
+                    tr [class "game-header"] [
+                        td [class "bomb-count-cell"] [mineDisplay model],
+                        td [class "face-button-cell"] [
+                          button [onClick ResetGame, class "face-button"] [buttonFace model.state]
+                        ],
+                        td [class "timer-cell"] [timer model.state]
                     ],
-                    td [class "timer-cell"] [timer model.state]
-                ],
-                tr [] [
-                    td [class "field-container-cell", colspan 3] [
-                        minefield model
+                    tr [] [
+                        td [class "field-container-cell", colspan 3] [
+                            minefield model
+                        ]
                     ]
                 ]
             ]
@@ -131,6 +133,7 @@ mineDisplay : Model -> Html Msg
 mineDisplay model =
     let num = case model.state of
                 Ready -> model.options.bombs |> toString
+                Won _ -> 0 |> toString
                 _     -> mineCount model.field |> toString
     in num |> leftPad '0' 3 |> text
 

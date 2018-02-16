@@ -2,7 +2,7 @@ module Game.Types exposing (..)
 
 import Array
 import Time exposing (Time)
-import Menu.Types exposing (..)
+import Menu.Types as MT exposing (Options)
 
 type CellState = Clicked | Unclicked FlagState
 
@@ -29,7 +29,7 @@ type Msg =
         | ResetGame
         | MineList (Int, Int) (List (Int, Int))
         | Tick Time
-        | MenuAction MenuMsg
+        | MenuAction MT.Msg
 
                     
 mineCount : Minefield -> Int
