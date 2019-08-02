@@ -1,14 +1,17 @@
 module Main exposing (main)
              
-import Html  exposing (program)
 import Game.View exposing (view) 
 import Game.State exposing (update, init)
+import Browser exposing (element)
 import Game.Types exposing (..)
-import Time exposing (every, second)
+import Time exposing (every)
+
+init_ : () ->  (Model, Cmd Msg)
+init_ _ = init 
 
 main =
-      program
-          { init = init
+      element
+          { init = init_
           , view = view
           , update = update
           , subscriptions = subscriptions
@@ -17,5 +20,5 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     case model.state of
-        Playing _ -> every second Tick
+        Playing _ -> every 1000 Tick
         _         -> Sub.none

@@ -4,3 +4,5 @@ elm-stuff
 repl-temp-*
 # vim swp files
 *.swp
+
+node_modules/

@@ -2,8 +2,9 @@ module Game.View exposing (view)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onWithOptions)
+import Html.Events exposing (onClick)
 import Game.Types exposing (..)
+import String exposing (fromInt)
 import Menu.View as MV
 import Array
 import Json.Decode as D
@@ -89,7 +90,7 @@ cellContents i j cell =
                                 ] 
                                 [flagToStr flag |> text]
         (Clicked, Bomb)     -> text "💣" 
-        (Clicked, Number n) -> span [class ("number-cell " ++ numClass n)] [n |> toString |> text]
+        (Clicked, Number n) -> span [class ("number-cell " ++ numClass n)] [n |> fromInt |> text]
         _                   -> text ""
 
 numClass : Int -> String
@@ -123,27 +124,23 @@ buttonFace state =
 timer : GameState -> Html Msg
 timer state =
     let num = case state of
-                Playing n -> toString n
-                Won n     -> toString n
-                Lost n    -> toString n
+                Playing n -> fromInt n
+                Won n     -> fromInt n
+                Lost n    -> fromInt n
                 _         -> "0"
     in num |> leftPad '0' 3 |> text
 
 mineDisplay : Model -> Html Msg
 mineDisplay model =
     let num = case model.state of
-                Ready -> model.options.bombs |> toString
-                Won _ -> 0 |> toString
-                _     -> mineCount model.field |> toString
+                Ready -> model.options.bombs |> fromInt
+                Won _ -> 0 |> fromInt
+                _     -> mineCount model.field |> fromInt
     in num |> leftPad '0' 3 |> text
 
 onRightClick : (Int, Int) -> Attribute Msg
 onRightClick coords = 
-    let options = { preventDefault = True
-                  , stopPropagation = True
-                  }
-        decoder = D.maybe D.bool |> D.map (\_ -> CellRightClicked coords)
-    in onWithOptions "contextmenu" options decoder
+    Html.Events.custom "contextmenu" (D.succeed { message = CellRightClicked coords, stopPropagation = True, preventDefault = True })
 
 leftPad : Char -> Int -> String -> String
 leftPad ch n str = 

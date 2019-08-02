@@ -3,6 +3,7 @@ module Game.State exposing (update, init)
 import Array
 import List
 import Random
+import Random.Extra exposing (bool)
 import Game.Types exposing (..)
 import Menu.State as MS
 import Menu.Types exposing (Options)
@@ -111,9 +112,9 @@ isWinningCell cell =
 clickCell : (Int, Int) -> Minefield -> Minefield
 clickCell (r, c) field = 
     let click cell = { cell | state = Clicked }
-        cell = getCell r c field
+        cell_ = getCell r c field
         newField = setCell r c click field
-    in case Maybe.map (\c -> (c.contents, c.state)) cell of
+    in case Maybe.map (\c_ -> (c_.contents, c_.state)) cell_ of
         --Dont allow clicks on flagged cells
         Just (_, Unclicked Flagged) -> field
         Just (Empty, Unclicked _)   -> clickSurrounding (r, c) newField
@@ -141,21 +142,21 @@ updateNumbers : Minefield -> Minefield
 updateNumbers field = 
     let surr r c = getSurrounding r c field
         count r c = surr r c 
-                        |> List.filter (\c -> c.contents == Bomb)
+                        |> List.filter (\c_ -> c_.contents == Bomb)
                         |> List.length
-        update num cell = case cell.contents of
-        Bomb -> cell
-        _    -> if num == 0
-                then { cell | contents = Empty }
-                else { cell | contents = Number num }
-    in mapField (\r c cell -> update (count r c) cell) field 
+        update_ num cell = case cell.contents of
+                                Bomb -> cell
+                                _    -> if num == 0
+                                        then { cell | contents = Empty }
+                                        else { cell | contents = Number num }
+    in mapField (\r c cell -> update_ (count r c) cell) field 
 
 getSurrounding : Int -> Int -> Minefield -> List Cell
 getSurrounding r c field =
     let offsets = [-1, 0, 1]
         offsetPairs = crossProduct offsets offsets
                         |> List.filter (\p -> p /= (0,0))
-        get (r, c) = getCell r c field
+        get (r_, c_) = getCell r_ c_ field
     in List.map (\(a, b) -> get (r + a, c + b)) offsetPairs
                         |> listFromMaybes
 
@@ -181,7 +182,7 @@ randomPairList rows cols len coords =
         pair = Random.pair rowGen colGen
         next lst = if List.length lst < len
                    then Random.andThen (\p -> next (maybeAppend p lst)) pair
-                   else Random.map (\_ -> lst) Random.bool
+                   else Random.map (\_ -> lst) bool
     in next []
 
 init : (Model, Cmd Msg)

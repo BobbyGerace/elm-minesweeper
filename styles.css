@@ -133,3 +133,22 @@ button:focus {
 .field-cell.clicked-bomb {
     background-color: hsl(0, 70%, 50%)
 }
+
+.menu-item {
+    display: inline-block;
+    color: #aaa;
+    font-size: 20px;
+    font-family: Arial;
+    padding: 10px;
+    font-weight: bold;
+}
+
+.menu-item.active {
+    border-bottom: 2px solid lightblue;
+    color: lightblue;
+}
+
+.menu-bar {
+    background-color: #222;
+    margin: -8px -8px 8px -8px;
+}

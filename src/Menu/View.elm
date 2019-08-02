@@ -3,7 +3,7 @@ module Menu.View exposing (..)
 import Menu.Types exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onWithOptions)
+import Html.Events exposing (onClick)
 
 view : Options -> Html Msg
 view opts = 

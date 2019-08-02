@@ -1,8 +1,10 @@
 module Game.Types exposing (..)
 
 import Array
-import Time exposing (Time)
+import Time
 import Menu.Types as MT exposing (Options)
+
+type alias Time = Float
 
 type CellState = Clicked | Unclicked FlagState
 
@@ -28,7 +30,7 @@ type Msg =
         | CellRightClicked (Int, Int)
         | ResetGame
         | MineList (Int, Int) (List (Int, Int))
-        | Tick Time
+        | Tick Time.Posix
         | MenuAction MT.Msg
 
                     
@@ -47,14 +49,14 @@ setCell r c fn field =
         Array.get c row
             |> Maybe.map (\cell -> fn cell)
             |> Maybe.map (\cell -> Array.set c cell row)
-            |> Maybe.map (\row -> Array.set r row field)
+            |> Maybe.map (\row_ -> Array.set r row_ field)
     )
     |> Maybe.withDefault field 
 
 setMine : (Int, Int) -> Minefield -> Minefield
 setMine (r, c) field = 
-    let setMine cell = { cell | contents = Bomb }
-    in setCell r c setMine field
+    let setMine_ cell = { cell | contents = Bomb }
+    in setCell r c setMine_ field
                                                
 mapField : (Int -> Int -> Cell -> Cell) -> Minefield -> Minefield
 mapField fn field =
